@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>플라밍고 복사</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: transparent;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+        }
+        
+        .container {
+            text-align: center;
+        }
+        
+        .copy-button {
+            background: linear-gradient(135deg, #FF6B9D 0%, #FEC3A6 100%);
+            border: none;
+            border-radius: 12px;
+            padding: 16px 32px;
+            font-size: 32px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(255, 107, 157, 0.3);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .copy-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(255, 107, 157, 0.4);
+        }
+        
+        .copy-button:active {
+            transform: translateY(0);
+        }
+        
+        .button-text {
+            color: white;
+            font-weight: 600;
+            font-size: 16px;
+        }
+        
+        .feedback {
+            margin-top: 16px;
+            font-size: 14px;
+            color: #FF6B9D;
+            font-weight: 500;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        
+        .feedback.show {
+            opacity: 1;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <button class="copy-button" onclick="copyToClipboard()">
+            <span class="emoji">🦩</span>
+            <span class="button-text">복사하기</span>
+        </button>
+        <div class="feedback" id="feedback">복사되었습니다! ✓</div>
+    </div>
+
+    <script>
+        async function copyToClipboard() {
+            const textToCopy = '🦩';
+            const feedback = document.getElementById('feedback');
+            
+            try {
+                // 방법 1: 최신 Clipboard API 시도
+                if (navigator.clipboard && navigator.clipboard.writeText) {
+                    await navigator.clipboard.writeText(textToCopy);
+                    showSuccess();
+                } else {
+                    // 방법 2: 구식 방법 (fallback)
+                    fallbackCopy(textToCopy);
+                }
+                
+            } catch (err) {
+                console.error('Clipboard API 실패:', err);
+                // 방법 2: 구식 방법 (fallback)
+                fallbackCopy(textToCopy);
+            }
+            
+            function fallbackCopy(text) {
+                try {
+                    // 임시 textarea 생성
+                    const textArea = document.createElement('textarea');
+                    textArea.value = text;
+                    textArea.style.position = 'fixed';
+                    textArea.style.left = '-999999px';
+                    textArea.style.top = '-999999px';
+                    document.body.appendChild(textArea);
+                    textArea.focus();
+                    textArea.select();
+                    
+                    // execCommand 시도
+                    const successful = document.execCommand('copy');
+                    document.body.removeChild(textArea);
+                    
+                    if (successful) {
+                        showSuccess();
+                    } else {
+                        showError();
+                    }
+                } catch (err) {
+                    console.error('Fallback 복사 실패:', err);
+                    showError();
+                }
+            }
+            
+            function showSuccess() {
+                feedback.textContent = '복사되었습니다! ✓';
+                feedback.style.color = '#FF6B9D';
+                feedback.classList.add('show');
+                setTimeout(() => {
+                    feedback.classList.remove('show');
+                }, 1500);
+            }
+            
+            function showError() {
+                feedback.textContent = '복사 실패 - 버튼을 길게 눌러 복사하세요';
+                feedback.style.color = '#ff4444';
+                feedback.classList.add('show');
+                setTimeout(() => {
+                    feedback.classList.remove('show');
+                }, 3000);
+            }
+        }
+    </script>
+</body>
+</html>
